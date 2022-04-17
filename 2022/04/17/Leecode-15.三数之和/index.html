@@ -8,7 +8,7 @@
 	
 		<link href="/favicon.ico" rel="icon">
 	 
-      <title>HTTPS CONTENT | zyangblog</title>
+      <title>Leecode 15.三数之和 | zyangblog</title>
 	
 <link rel="stylesheet" href="/css/font-awesome/css/font-awesome.css">
 
@@ -121,18 +121,20 @@ ga('send', 'pageview');
 		
 		
 			<header class="entry-header">
-				<h2 class="entry-title"><a class="post-title-link" href="/2022/04/17/HTTPS%E8%AF%A6%E8%A7%A3/" rel="bookmark">HTTPS CONTENT</a></h2>	
+				<h2 class="entry-title"><a class="post-title-link" href="/2022/04/17/Leecode-15.%E4%B8%89%E6%95%B0%E4%B9%8B%E5%92%8C/" rel="bookmark">Leecode 15.三数之和</a></h2>	
 			</header>
 		
 		<!-- .entry-header -->
 		<div class="entry-content">
 			
-				<p> HTTPS详解</p>
-<p>HTTPS主要是为了解决在http协议中的问题，针对http协议中的三个问题进行优化。</p>
-<p><img src="https://img-blog.csdnimg.cn/5c185650c5e841e5a7f19ef66ee32df8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_14,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p>以下为HTTPS的具体优化以及流程</p>
-<p><img src="https://img-blog.csdnimg.cn/52f4b24be80445beb1197b3f257f3268.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img" style="zoom:200%;" /><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p><a target="_blank" rel="noopener" href="http://assets.processon.com/chart_image/624ad1a97d9c080724790451.png">http://assets.processon.com/chart_image/624ad1a97d9c080724790451.png</a></p>
+				<p> 因为是经常碰见的题，所以做一下记录，不是一个难题。</p>
+<p><img src="https://img-blog.csdnimg.cn/8781a3c6fe2048cc93517182d21b7110.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_16,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">class Solution &#123;</span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; threeSum(int[] nums) &#123;</span><br><span class="line">     if(nums.length==0)&#123;</span><br><span class="line">         return new ArrayList(0);</span><br><span class="line">     &#125;</span><br><span class="line">     int len=nums.length;</span><br><span class="line">     List&lt;List&lt;Integer&gt;&gt; lists=new ArrayList();</span><br><span class="line">//首先将数字排序，这点很关键，排序后我们才能更好的选择我们要的数字</span><br><span class="line">     Arrays.sort(nums);</span><br><span class="line">     for(int i=0;i&lt;len;i++)&#123;</span><br><span class="line">        //关于这点，可以等看完下面代码回头看，直接看可能不好理解</span><br><span class="line">        //其实就是如果我们选择的第一数字已经比0大了。那代表我们不可能在找到和为0的list了，所以就可以直接返回了。</span><br><span class="line">            if(nums[i]&gt;0)&#123;</span><br><span class="line">             return lists;</span><br><span class="line">         &#125;</span><br><span class="line">//如果第i个和i-1个相同就直接跳过，因为题目中说了不要相同的。</span><br><span class="line">         if(i&gt;0&amp;&amp;nums[i]==nums[i-1])&#123;</span><br><span class="line">              continue;</span><br><span class="line">         &#125;   </span><br><span class="line">         int mid=i+1;</span><br><span class="line">         int right=len-1;</span><br><span class="line">//其实这里就是我们去选择第i+1个和len-1个加上第i个，如果是0就添加到数组中，否则继续遍历</span><br><span class="line">         while(mid&lt;right)&#123;</span><br><span class="line">             if(nums[i]+nums[mid]+nums[right]==0)&#123;</span><br><span class="line">                 lists.add(Arrays.asList(nums[i],nums[mid],nums[right]));</span><br><span class="line">                  while(mid&lt;right)&#123;</span><br><span class="line">                 if(nums[mid]==nums[mid+1])&#123;</span><br><span class="line">                     mid=mid+1;</span><br><span class="line">                 &#125;else </span><br><span class="line">                    break; </span><br><span class="line">             &#125;</span><br><span class="line">            while(mid&lt;right)&#123;</span><br><span class="line">                 if(nums[right]==nums[right-1])&#123;</span><br><span class="line">                     right=right-1;</span><br><span class="line">                 &#125;else </span><br><span class="line">                 break;</span><br><span class="line">             &#125;</span><br><span class="line">               mid++;</span><br><span class="line">            right--;</span><br><span class="line">             &#125;else if(nums[i]+nums[mid]+nums[right]&gt;0)&#123;</span><br><span class="line">                 right--;</span><br><span class="line">             &#125;else&#123;</span><br><span class="line">                 mid++;</span><br><span class="line">             &#125;   </span><br><span class="line">            </span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">  return lists;</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<blockquote>
+<p>其实这题的主要思路就是对每一个当前的数字nums[i]都进行一次i后的遍历。</p>
+</blockquote>
 
 
 				
@@ -272,14 +274,14 @@ ga('send', 'pageview');
 		<footer class="entry-footer">
 			<span class="posted-on font-asesome-icon">
 	<a href="" rel="bookmark">
-	<time class="updated" datetime="2022-04-17T00:46:45.553Z">2022-04-17</time>
+	<time class="updated" datetime="2022-04-17T13:15:09.168Z">2022-04-17</time>
 	</a>
 </span>
 
 		
 
     <span class="eye font-asesome-icon" >
-         <span id="/2022/04/17/HTTPS%E8%AF%A6%E8%A7%A3/" class="leancloud_visitors" data-flag-title="HTTPS CONTENT">
+         <span id="/2022/04/17/Leecode-15.%E4%B8%89%E6%95%B0%E4%B9%8B%E5%92%8C/" class="leancloud_visitors" data-flag-title="Leecode 15.三数之和">
         
         </span>
     </span>
