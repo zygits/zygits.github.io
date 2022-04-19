@@ -8,7 +8,7 @@
 	
 		<link href="/favicon.ico" rel="icon">
 	 
-      <title>HTTPS CONTENT | zyangblog</title>
+      <title>MVCC 多版本并发控制 | zyangblog</title>
 	
 <link rel="stylesheet" href="/css/font-awesome/css/font-awesome.css">
 
@@ -129,18 +129,80 @@ ga('send', 'pageview');
 		
 		
 			<header class="entry-header">
-				<h2 class="entry-title"><a class="post-title-link" href="/2022/04/17/HTTPS%E8%AF%A6%E8%A7%A3/" rel="bookmark">HTTPS CONTENT</a></h2>	
+				<h2 class="entry-title"><a class="post-title-link" href="/2022/04/19/MVCC-%E5%A4%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/" rel="bookmark">MVCC 多版本并发控制</a></h2>	
 			</header>
 		
 		<!-- .entry-header -->
 		<div class="entry-content">
 			
-				<p> HTTPS详解</p>
-<p>HTTPS主要是为了解决在http协议中的问题，针对http协议中的三个问题进行优化。</p>
-<p><img src="https://img-blog.csdnimg.cn/5c185650c5e841e5a7f19ef66ee32df8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_14,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p>以下为HTTPS的具体优化以及流程</p>
-<p><img src="https://img-blog.csdnimg.cn/52f4b24be80445beb1197b3f257f3268.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img" style="zoom:200%;"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p><a target="_blank" rel="noopener" href="http://assets.processon.com/chart_image/624ad1a97d9c080724790451.png">http://assets.processon.com/chart_image/624ad1a97d9c080724790451.png</a></p>
+				<ul>
+<li>前提概要<ul>
+<li>什么是 MVCC</li>
+<li>什么是当前读和快照读？</li>
+<li>当前读，快照读和 MVCC 的关系</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>MVCC（多版本并发控制）</p>
+<p>主要是为了实现对数据库的并发访问，一般用于数据库中。</p>
+<p><strong>MVCC</strong> 在 <strong>MySQL InnoDB</strong> 中的实现主要是为了提高数据库并发性能，用更好的方式去处理读-写冲突，做到即使有读写冲突时，也能做到不加锁，非阻塞并发读</p>
+</blockquote>
+<p>什么是当前读和快照读？</p>
+<blockquote>
+<p>当前读：顾名思义读的就是当前最新的，为了达到读的是当前的最新的数据，就必须保证读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁。所以像 select lock in share mode (<code>共享锁</code>), select for update; update; insert; delete (<code>排他锁</code>)这些操作都是一种当前读。</p>
+<p>快照读：官方概念是不加锁的非阻塞读，快照读的前提条件是非串行级别，如果在串行级别的隔离等级下，每个操作都是排他性的，那么快照读就退化成了当前读。所以像<code>不加锁</code>的 select 操作就是快照读。快照读的实现是基于多版本并发控制，即 MVCC ,可以认为 MVCC 是行锁的一个变种，但它在很多情况下，避免了加锁操作，降低了开销；既然是基于多版本，即快照读可能读到的并不一定是数据的最新版本，而有可能是之前的历史版本。</p>
+</blockquote>
+<p><strong>说白了 MVCC 就是为了实现读-写冲突不加锁，而这个读指的就是<code>快照读</code>, 而非当前读，当前读实际上是一种加锁的操作，是悲观锁的实现。</strong></p>
+<p>当前读，快照读和MVCC的关系</p>
+<p>​                 <img src="https://img-blog.csdnimg.cn/c6a8854b80c14adfb0e3816566cc7bd1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<hr>
+<p> <strong>MVCC 带来的好处是？</strong></p>
+<p>多版本并发控制（MVCC）是一种用来解决<code>读-写冲突</code>的<strong>无锁并发控制</strong>，也就是为事务分配单向增长的时间戳，为每个修改保存一个版本，版本与事务时间戳关联，读操作只读该事务开始前的数据库的快照。 所以 MVCC 可以为数据库解决以下问题</p>
+<ul>
+<li>在并发读写数据库时，可以做到在读操作时不用阻塞写操作，写操作也不用阻塞读操作，提高了数据库并发读写的性能</li>
+<li>同时还可以解决脏读，幻读，不可重复读等事务隔离问题，但不能解决更新丢失问题</li>
+</ul>
+<p> 简而言之，MVCC 就是因为大佬们，不满意只让数据库采用悲观锁这样性能不佳的形式去解决读-写冲突问题，而提出的解决方案，所以<strong>在数据库中，因为有了 MVCC，所以我们可以形成两个组合：</strong></p>
+<ul>
+<li><code>MVCC + 悲观锁</code><br> MVCC解决读写冲突，悲观锁解决写写冲突</li>
+<li><code>MVCC + 乐观锁</code><br> MVCC 解决读写冲突，乐观锁解决写写冲突</li>
+</ul>
+<hr>
+<h3 id="MVCC-的实现原理"><a href="#MVCC-的实现原理" class="headerlink" title="MVCC 的实现原理"></a>MVCC 的实现原理</h3><p>MVCC 的目的就是多版本并发控制，在数据库中的实现，就是为了解决<code>读写冲突</code>，它的实现原理主要是依赖记录中的 <strong><code>3个隐式字段</code><strong>，</strong><code>undo日志</code></strong> ，**<code>Read View</code>** 来实现的。所以我们先来看看这个三个 point 的概念。</p>
+<p><strong>隐式字段</strong></p>
+<p>每行记录除了我们自定义的字段外，还有数据库隐式定义的<code>DB_TRX_ID</code>, <code>DB_ROLL_PTR</code>, <code>DB_ROW_ID</code>等字段。</p>
+<ul>
+<li><strong><code>DB_TRX_ID</code></strong><br> 6 byte，最近修改(<code>修改/插入</code>)事务 ID：记录创建这条记录&#x2F;最后一次修改该记录的事务 ID</li>
+<li><strong><code>DB_ROLL_PTR</code></strong><br> 7 byte，回滚指针，指向这条记录的上一个版本（存储于 rollback segment 里）</li>
+<li><strong><code>DB_ROW_ID</code></strong><br> 6 byte，隐含的自增 ID（隐藏主键），如果数据表没有主键，InnoDB 会自动以**<code>DB_ROW_ID</code>**产生一个聚簇索引</li>
+<li>实际存在一个隐藏的flag字段，既记录被更新或删除并不代表真的删除，而是删除 flag 变了。</li>
+</ul>
+<p>​                         <img src="https://img-blog.csdnimg.cn/911bc40cd37c45eebae55d0e07d3a549.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<p> 如上图，**<code>DB_ROW_ID</code>** 是数据库默认为该行记录生成的唯一隐式主键，**<code>DB_TRX_ID</code>** 是当前操作该记录的事务 ID ,而 <strong><code>DB_ROLL_PTR</code></strong> 是一个回滚指针，用于配合 undo日志，指向上一个旧版本。</p>
+<hr>
+<p><strong>undo日志</strong></p>
+<p>undo log 主要分为两种：</p>
+<ul>
+<li><strong>insert undo log</strong><br> 代表事务在 <strong><code>insert</code></strong> 新记录时产生的 <strong><code>undo log</code></strong>, 只在事务回滚时需要，并且在事务提交后可以被立即丢弃</li>
+<li><strong>update undo log</strong><br> 事务在进行 <strong><code>update</code></strong> 或 <strong><code>delete</code></strong> 时产生的 <strong><code>undo log</code></strong> ; 不仅在事务回滚时需要，在快照读时也需要；所以不能随便删除，只有在快速读或事务回滚不涉及该日志时，对应的日志才会被 <strong><code>purge</code></strong> 线程统一清除</li>
+</ul>
+<p>对 MVCC 有帮助的实质是 <strong><code>update undo log</code> ，<code>undo log</code></strong> 实际上就是存在 <strong><code>rollback segment</code></strong> 中旧记录链，<strong>它的执行流程如下：</strong></p>
+<p>​           <img src="https://img-blog.csdnimg.cn/4cf97be6b90f47a8ae3f7f99dd042c31.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<p>​          </p>
+<p>​           <img src="https://img-blog.csdnimg.cn/baad437ecf5f40fca02e64e57f838c50.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<p>​                  <img src="https://img-blog.csdnimg.cn/7e11cd79f725430585be755efd917829.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<p>​             <img src="https://img-blog.csdnimg.cn/f5dbd96f1ab140b1a6511f88a785c024.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<p>​                 <img src="https://img-blog.csdnimg.cn/c033d91b796c401dbe238ee0758a2ec4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<p> 从上面，我们就可以看出，不同事务或者相同事务的对同一记录的修改，会导致该记录的undo log成为一条记录版本线性表，既链表，undo log 的链首就是最新的旧记录，链尾就是最早的旧记录（当然就像之前说的该 undo log 的节点可能是会 purge 线程清除掉，向图中的第一条 insert undo log，其实在事务提交之后可能就被删除丢失了，不过这里为了演示，所以还放在这里）</p>
+<hr>
+<p> <strong>Read View 读视图</strong></p>
+<p> 什么是 Read View，说白了 Read View 就是事务进行快照读操作的时候生产的读视图 (Read View)，在该事务执行的快照读的那一刻，会生成数据库系统当前的一个快照，记录并维护系统当前活跃事务的 ID (当每个事务开启时，都会被分配一个 ID , 这个 ID 是递增的，所以最新的事务，ID 值越大)</p>
+<p>所以我们知道 <strong><code>Read View</code></strong> 主要是用来做可见性判断的, 即当我们某个事务执行快照读的时候，对该记录创建一个 <code>Read View</code> 读视图，把它比作条件用来判断当前事务能够看到哪个版本的数据，既可能是当前最新的数据，也有可能是该行记录的**<code>undo log</code>**里面的某个版本的数据。</p>
+<p>Read View遵循一个可见性算法，主要是将要被修改的数据的最新记录中的 <strong>DB_TRX_ID</strong>（即当前事务 ID ）取出来，与系统当前其他活跃事务的 ID 去对比（由 Read View 维护），如果 DB_TRX_ID 跟 Read View 的属性做了某些比较，不符合可见性，那就通过 <strong>DB_ROLL_PTR</strong> 回滚指针去取出 <strong>Undo Log</strong> 中的 <strong>DB_TRX_ID</strong> 再比较，即遍历链表的 <strong>DB_TRX_ID</strong>（从链首到链尾，即从最近的一次修改查起），直到找到满足特定条件的 <strong>DB_TRX_ID</strong> , 那么这个 <strong>DB_TRX_ID</strong> 所在的旧记录就是当前事务能看见的最新老版本。</p>
+<p>​               <img src="https://img-blog.csdnimg.cn/0fab48ac04f4449d9c4f22944860e03e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAemhvdXlhbmcwNDE2,size_20,color_FFFFFF,t_70,g_se,x_16" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"> </p>
+<p> 其实用通俗的个人理解语言来讲，你可以把自己想象成一个事务，所谓的<strong>readview</strong>就是当你在那个时刻你能够看到的数据库中的变化和数据库中数据的当前值。</p>
+<p> 换句话讲如果假如水果店有三个苹果，一个人打电话和老板说1点10分要买一个苹果，这时1点整你到了水果店要买一个水果，这时你的readview就是你知道有三个苹果，但是不知道1点10分有一个苹果已经被人预定了，所以其实在readview中的比较就是比较执行当前事务的id能够看见前面执行了多少的事务id。</p>
 
 
 				
@@ -280,14 +342,14 @@ ga('send', 'pageview');
 		<footer class="entry-footer">
 			<span class="posted-on font-asesome-icon">
 	<a href="" rel="bookmark">
-	<time class="updated" datetime="2022-04-17T00:46:45.553Z">2022-04-17</time>
+	<time class="updated" datetime="2022-04-19T06:20:51.037Z">2022-04-19</time>
 	</a>
 </span>
 
 		
 
     <span class="eye font-asesome-icon" >
-         <span id="/2022/04/17/HTTPS%E8%AF%A6%E8%A7%A3/" class="leancloud_visitors" data-flag-title="HTTPS CONTENT">
+         <span id="/2022/04/19/MVCC-%E5%A4%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/" class="leancloud_visitors" data-flag-title="MVCC 多版本并发控制">
         
         </span>
     </span>
