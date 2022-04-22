@@ -79,7 +79,7 @@ ga('send', 'pageview');
 <aside class="widget">
 		<h3 class="widget-title">Archives</h3>		
 		<ul>
-			<ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a><span class="archive-list-count">4</span></li></ul>
+			<ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a><span class="archive-list-count">5</span></li></ul>
 		</ul>
 	</aside>
 
@@ -96,6 +96,10 @@ ga('send', 'pageview');
 		<h3 class="widget-title">Recent Posts</h3>		
 		<ul>
 			
+          <li>
+            <a href="/2022/04/22/Leecode%2047.%E5%85%A8%E6%8E%92%E5%88%97II/">Leecode 47.全排列II</a>
+          </li>
+        
           <li>
             <a href="/2022/04/19/MVCC-%E5%A4%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/">MVCC 多版本并发控制</a>
           </li>
@@ -125,6 +129,52 @@ ga('send', 'pageview');
 		<div id="content" class="site-content">
 			<main id="main" class="site-main" role="main">
 				
+  
+    
+<article class="hentry ">
+		
+		
+			<header class="entry-header">
+				<h2 class="entry-title"><a class="post-title-link" href="/2022/04/22/Leecode%2047.%E5%85%A8%E6%8E%92%E5%88%97II/" rel="bookmark">Leecode 47.全排列II</a></h2>	
+			</header>
+		
+		<!-- .entry-header -->
+		<div class="entry-content">
+			
+				<p>![e7e170ccb8b944dca027c8efa46a3927](\Leecode 47.全排列II\e7e170ccb8b944dca027c8efa46a3927.png)</p>
+<p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">class Solution &#123;</span><br><span class="line">    //存放结果</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; result = new ArrayList&lt;&gt;();</span><br><span class="line">    //暂存结果</span><br><span class="line">    List&lt;Integer&gt; path = new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; permuteUnique(int[] nums) &#123;</span><br><span class="line">        boolean[] used = new boolean[nums.length];</span><br><span class="line">        Arrays.fill(used, false);</span><br><span class="line">        Arrays.sort(nums);</span><br><span class="line">        backTrack(nums, used);</span><br><span class="line">        return result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void backTrack(int[] nums, boolean[] used) &#123;</span><br><span class="line">        if (path.size() == nums.length) &#123;</span><br><span class="line">            result.add(new ArrayList&lt;&gt;(path));</span><br><span class="line">         </span><br><span class="line">        &#125;</span><br><span class="line">        for (int i = 0; i &lt; nums.length; i++) &#123;</span><br><span class="line">            // used[i - 1] == true，说明同⼀树⽀nums[i - 1]使⽤过</span><br><span class="line">            // used[i - 1] == false，说明同⼀树层nums[i - 1]使⽤过</span><br><span class="line">            // 如果同⼀树层nums[i - 1]使⽤过则直接跳过</span><br><span class="line">            if (i &gt; 0 &amp;&amp; nums[i] == nums[i - 1] &amp;&amp; used[i - 1] == false) &#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            //如果同⼀树⽀nums[i]没使⽤过开始处理</span><br><span class="line">            if (used[i] == false) &#123;</span><br><span class="line">                used[i] = true;//标记同⼀树⽀nums[i]使⽤过，防止同一树支重复使用</span><br><span class="line">                path.add(nums[i]);</span><br><span class="line">                backTrack(nums, used);</span><br><span class="line">                path.remove(path.size() - 1);//回溯，说明同⼀树层nums[i]使⽤过，防止下一树层重复</span><br><span class="line">                used[i] = false;//回溯</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动">![](.&#x2F;Leecode 47.全排列II&#x2F;170b52df4bab483689b0610a879e4126.png)</p>
+<p> 这里的回溯需要仔细考虑，可以画一个dfs的树状图理解一下。</p>
+<p>是一个非常经典的面试题。</p>
+
+
+				
+				
+			
+		</div><!-- .entry-content -->
+		
+		<footer class="entry-footer">
+			<span class="posted-on font-asesome-icon">
+	<a href="" rel="bookmark">
+	<time class="updated" datetime="2022-04-22T06:31:37.051Z">2022-04-22</time>
+	</a>
+</span>
+
+		
+
+    <span class="eye font-asesome-icon" >
+         <span id="/2022/04/22/Leecode%2047.%E5%85%A8%E6%8E%92%E5%88%97II/" class="leancloud_visitors" data-flag-title="Leecode 47.全排列II">
+        
+        </span>
+    </span>
+
+		</footer><!-- .entry-footer -->
+</article>
+<div class="misc">
+    <a href="#main"><span class="top font-asesome-icon">Top</span></a>
+</div>
   
     
 <article class="hentry ">
