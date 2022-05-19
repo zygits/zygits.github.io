@@ -79,7 +79,7 @@ ga('send', 'pageview');
 <aside class="widget">
 		<h3 class="widget-title">Archives</h3>		
 		<ul>
-			<ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a><span class="archive-list-count">5</span></li></ul>
+			<ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">May 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a><span class="archive-list-count">5</span></li></ul>
 		</ul>
 	</aside>
 
@@ -97,6 +97,10 @@ ga('send', 'pageview');
 		<ul>
 			
           <li>
+            <a href="/2022/05/19/JWT%E6%8A%80%E6%9C%AF%E5%BA%94%E7%94%A8/">JWT技术应用</a>
+          </li>
+        
+          <li>
             <a href="/2022/04/22/Leecode%2047.%E5%85%A8%E6%8E%92%E5%88%97II/">Leecode 47.全排列II</a>
           </li>
         
@@ -112,10 +116,6 @@ ga('send', 'pageview');
             <a href="/2022/04/17/Leecode-15.%E4%B8%89%E6%95%B0%E4%B9%8B%E5%92%8C/">Leecode 15.三数之和</a>
           </li>
         
-          <li>
-            <a href="/2022/04/17/HTTPS%E8%AF%A6%E8%A7%A3/">HTTPS CONTENT</a>
-          </li>
-        
 		</ul>
 	</aside>
 
@@ -129,6 +129,64 @@ ga('send', 'pageview');
 		<div id="content" class="site-content">
 			<main id="main" class="site-main" role="main">
 				
+  
+    
+<article class="hentry ">
+		
+		
+			<header class="entry-header">
+				<h2 class="entry-title"><a class="post-title-link" href="/2022/05/19/JWT%E6%8A%80%E6%9C%AF%E5%BA%94%E7%94%A8/" rel="bookmark">JWT技术应用</a></h2>	
+			</header>
+		
+		<!-- .entry-header -->
+		<div class="entry-content">
+			
+				<p>1.1 组成<br>一个token分3部分，按顺序为</p>
+<p>头部（header)<br>载荷（payload)<br>签证（signature)<br>三部分之间用.号做分隔。例如：</p>
+<p>eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxYzdiY2IzMS02ODFlLTRlZGYtYmU3Yy0wOTlkODAzM2VkY2UiLCJleHAiOjE1Njk3Mjc4OTF9.wweMzyB3tSQK34Jmez36MmC5xpUh15Ni3vOV_SGCzJ8</p>
+<p>1.2 header<br>Jwt的头部承载两部分信息：</p>
+<p>声明类型，这里是Jwt<br>声明加密的算法 通常直接使用 HMAC SHA256<br>Jwt里验证和签名使用的算法列表如下：</p>
+<p>JWS	算法名称<br>HS256	HMAC256<br>HS384	HMAC384<br>HS512	HMAC512<br>RS256	RSA256<br>RS384	RSA384<br>RS512	RSA512<br>ES256	ECDSA256<br>ES384	ECDSA384<br>ES512	ECDSA512</p>
+<p>1.3 playload<br>载荷就是存放有效信息的地方。基本上填2种类型数据</p>
+<p>标准中注册的声明的数据；<br>自定义数据。<br>由这2部分内部做base64加密。</p>
+<p>标准中注册的声明 (建议但不强制使用)<br>iss: jwt签发者<br>sub: jwt所面向的用户<br>aud: 接收jwt的一方<br>exp: jwt的过期时间，这个过期时间必须要大于签发时间<br>nbf: 定义在什么时间之前，该jwt都是不可用的.<br>iat: jwt的签发时间<br>jti: jwt的唯一身份标识，主要用来作为一次性token,从而回避重放攻击。<br>自定义数据:存放我们想放在token中存放的key-value值</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JWTUtils</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">jwtToken</span> <span class="operator">=</span> <span class="string">&quot;123456Mszlu!@#$$&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">createToken</span><span class="params">(Long userId)</span>&#123;</span><br><span class="line">        Map&lt;String,Object&gt; claims = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        claims.put(<span class="string">&quot;userId&quot;</span>,userId);</span><br><span class="line">        <span class="type">JwtBuilder</span> <span class="variable">jwtBuilder</span> <span class="operator">=</span> Jwts.builder()</span><br><span class="line">                .signWith(SignatureAlgorithm.HS256, jwtToken) <span class="comment">// 签发算法，秘钥为jwtToken</span></span><br><span class="line">                .setClaims(claims) <span class="comment">// body数据，要唯一，自行设置</span></span><br><span class="line">                .setIssuedAt(<span class="keyword">new</span> <span class="title class_">Date</span>()) <span class="comment">// 设置签发时间</span></span><br><span class="line">                .setExpiration(<span class="keyword">new</span> <span class="title class_">Date</span>(System.currentTimeMillis() + <span class="number">24</span>  * <span class="number">60</span> * <span class="number">60</span> * <span class="number">1000</span>));<span class="comment">// 一天的有效时间</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">token</span> <span class="operator">=</span> jwtBuilder.compact();</span><br><span class="line">        <span class="keyword">return</span> token;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Map&lt;String, Object&gt; <span class="title function_">checkToken</span><span class="params">(String token)</span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">Jwt</span> <span class="variable">parse</span> <span class="operator">=</span> Jwts.parser().setSigningKey(jwtToken).parse(token);</span><br><span class="line">            <span class="keyword">return</span> (Map&lt;String, Object&gt;) parse.getBody();</span><br><span class="line">        &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">@RestController</span><br><span class="line">@RequestMapping(&quot;login&quot;)</span><br><span class="line">public class LoginController &#123;</span><br><span class="line">    @Autowired</span><br><span class="line">    private LoginService loginService;</span><br><span class="line"></span><br><span class="line">    @PostMapping</span><br><span class="line">    public Result login(@RequestBody loginParams loginp)&#123;</span><br><span class="line">        return loginService.login(loginp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//loginParams类        与前端交互的对象 从RequestBody中获取</span><br><span class="line">@Data</span><br><span class="line">public class loginParams &#123;</span><br><span class="line"> private  String account;</span><br><span class="line"> private  String password;</span><br><span class="line"> private  String nickname;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public interface LoginService &#123;</span><br><span class="line">    Result login(loginParams loginp);</span><br><span class="line"></span><br><span class="line">    SysUser checkToken(String token);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line">@Transactional</span><br><span class="line">public class LoginServiceImpl implements LoginService &#123;</span><br><span class="line">    @Autowired</span><br><span class="line">    //注入用户服务</span><br><span class="line">    private SysUserService sysUserService;  </span><br><span class="line">    @Autowired</span><br><span class="line">    //注入Redis</span><br><span class="line">    private RedisTemplate&lt;String,String&gt; redisTemplate;</span><br><span class="line">    //加密盐，这里采用固定的加密盐，也可以动态改变</span><br><span class="line">    private  static final String slat=&quot;mszlu!@#&quot;;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Result login(loginParams loginp) &#123;</span><br><span class="line">        //检查参数是否合法</span><br><span class="line">        //看用户名和密码查询  如果存在使用jwt生成token返回给前端，token放入redi中 redis token：user信息设置过期时间</span><br><span class="line">        //登录认证时候先认证token字符串是否合法，去认证redis是否存在</span><br><span class="line">        String account = loginp.getAccount();</span><br><span class="line">        String password = loginp.getPassword();</span><br><span class="line">        password= DigestUtils.md5Hex(password+slat);</span><br><span class="line">        if (StringUtils.isBlank(account) || StringUtils.isBlank(password)) &#123;</span><br><span class="line">            return Result.fail(ErrorCode.PARAMS_ERROR.getCode(), ErrorCode.PARAMS_ERROR.getMsg());</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        SysUser sysUser = sysUserService.findUser(account, password);</span><br><span class="line">        if (sysUser == null) &#123;</span><br><span class="line">            return Result.fail(ErrorCode.ACCOUNT_PWD_NOT_EXIST.getCode(), ErrorCode.ACCOUNT_PWD_NOT_EXIST.getMsg());</span><br><span class="line">        &#125;</span><br><span class="line">        String token = JWTUtils.createToken(sysUser.getId());</span><br><span class="line">        redisTemplate.opsForValue().set(&quot;TOKEN_&quot;+token, JSON.toJSONString(sysUser),1, TimeUnit.DAYS);</span><br><span class="line"></span><br><span class="line">        return Result.success(token);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public SysUser checkToken(String token) &#123;</span><br><span class="line"></span><br><span class="line">        if(StringUtils.isBlank(token))&#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">        Map&lt;String, Object&gt; stringObjectMap = JWTUtils.checkToken(token);</span><br><span class="line">        if (stringObjectMap==null)&#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">        String userJson = redisTemplate.opsForValue().get(&quot;TOKEN_&quot; + token);</span><br><span class="line">        if(StringUtils.isBlank(userJson))&#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">        SysUser sysUser = JSON.parseObject(userJson, SysUser.class);</span><br><span class="line">        return sysUser;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">   public SysUser findUser(String account, String pwd) &#123;</span><br><span class="line">       LambdaQueryWrapper&lt;SysUser&gt; queryWrapper = new LambdaQueryWrapper&lt;&gt;();</span><br><span class="line">       queryWrapper.eq(SysUser::getAccount,account);</span><br><span class="line">       queryWrapper.eq(SysUser::getPassword,pwd);</span><br><span class="line">       queryWrapper.select(SysUser::getId,SysUser::getAccount,SysUser::getAvatar,SysUser::getNickname);</span><br><span class="line">       queryWrapper.last(&quot;limit 1&quot;);</span><br><span class="line">       SysUser sysUser = sysUserMapper.selectOne(queryWrapper);</span><br><span class="line">       return sysUser;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+				
+				
+			
+		</div><!-- .entry-content -->
+		
+		<footer class="entry-footer">
+			<span class="posted-on font-asesome-icon">
+	<a href="" rel="bookmark">
+	<time class="updated" datetime="2022-05-19T07:41:31.385Z">2022-05-19</time>
+	</a>
+</span>
+
+		
+
+    <span class="eye font-asesome-icon" >
+         <span id="/2022/05/19/JWT%E6%8A%80%E6%9C%AF%E5%BA%94%E7%94%A8/" class="leancloud_visitors" data-flag-title="JWT技术应用">
+        
+        </span>
+    </span>
+
+		</footer><!-- .entry-footer -->
+</article>
+<div class="misc">
+    <a href="#main"><span class="top font-asesome-icon">Top</span></a>
+</div>
   
     
 <article class="hentry ">
